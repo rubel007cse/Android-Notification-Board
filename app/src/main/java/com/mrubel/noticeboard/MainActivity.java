@@ -9,6 +9,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonArrayRequest;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -64,5 +73,54 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
+
+
+
+    void fetchingData(){
+
+
+        String myURL = "http://mrubel.com/tuntuninews/api/gettingnews.php";
+
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(myURL, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+
+                final String[] news_title = new String[response.length()];
+                final String[] news_detail = new String[response.length()];
+                final String[] news_time = new String[response.length()];
+
+                for (int i =0; i < response.length(); i++){
+
+                    try {
+
+                        JSONObject jsonObject = (JSONObject) response.get(i);
+                        news_title[i] = jsonObject.getString("title");
+                        news_detail[i] = jsonObject.getString("news");
+                        news_time[i] = jsonObject.getString("time");
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+
+
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d("Volley Log", error);
+            }
+        });
+
+
+        com.mrubel.noticeboard.AppController.getInstance().addToRequestQueue(jsonArrayRequest);
+        Toast.makeText(getApplicationContext(), "Data Loaded Successfully!", Toast.LENGTH_SHORT).show();
+
+    }
+
 
 }
